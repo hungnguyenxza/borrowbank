@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <style>
+        .table-success {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container py-3">
+        <form id="form-calc" onsubmit="submitForm(event)">
+            <div class="form-group">
+                <label for="amount">Tổng tiền vay</label>
+                <div class="input-group">
+                    <input type="text" onkeyup="amountHelp.innerHTML = formatter.format(this.value);" value="800000000"
+                    class="form-control" id="amount" aria-describedby="amountHelp" autocomplete="off">
+                    <div class="input-group-append">
+                        <span class="input-group-text" id="basic-addon2">đồng</span>
+                    </div>
+                </div>
+                <small id="amountHelp" class="form-text text-muted">800.000.000</small>
+            </div>
+            <div class="form-group">
+                <label for="period">Tổng thời gian vay (năm)</label>
+                <input type="number" value="15" required class="form-control" id="period">
+            </div>
+            <div class="form-group">
+                <label for="rate-prefer">Lãi suất ưu đãi (%)</label>
+                <input type="text" value="8.6" class="form-control" id="rate-prefer">
+            </div>
+            <div class="form-group">
+                <label for="year-rate-prefer">Số năm ưu đãi</label>
+                <input type="number" value="2" class="form-control" id="year-rate-prefer">
+            </div>
+            <div class="form-group">
+                <label for="rate-after">Lãi suất thả nổi (%)</label>
+                <input type="text" value="11" class="form-control" id="rate-after">
+            </div>
+            <button type="submit" class="btn btn-primary">Tính</button>
+            <button type="reset" class="btn">Xóa</button>
+        </form>
+        <div class="dropdown-divider"></div>
+        <table id="table-result" class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Thời gian</th>
+                    <th>Lãi</th>
+                    <th>Dư nợ</th>
+                    <th>Gốc</th>
+                    <th>Lãi</th>
+                    <th>Tổng phải trả</th>
+                </tr>
+            </thead>
+            <tbody id="result"></tbody>
+            <tfoot id="sumary"></tfoot>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
+
+    <script src="https://momentjs.com/downloads/moment.js"></script>
+
+    <script>
+
+        const formatter = new Intl.NumberFormat('it-IT', {
+            style: 'currency',
+            currency: 'VND',
+            minimumFractionDigits: 0
+        })
+
+        let now = (new Date());
+        now.setDate(1);
+        console.log(now);
+
+        function submitForm(e) {
+            e.preventDefault();
+
+            let amountValue = parseInt(amount.value);
+            let periodValue = parseInt(period.value) * 12;
+            let ratePrefer = parseFloat(document.getElementById('rate-prefer').value);
+            let monthsRatePrefer = parseInt(document.getElementById('year-rate-prefer').value) * 12;
+            let rateAfter = parseFloat(document.getElementById('rate-after').value);
+
+            let amountPerMonths = parseFloat(amountValue / periodValue);
+
+            $('#result').html(`
+                <tr>
+                    <td>0</td>
+                    <td>${moment(now).format('DD/MM/YYYY')}</td>
+                    <td>${ratePrefer}%</td>
+                    <td>${formatter.format(amountValue)}</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+            `);
+            // <th>#</th>
+            //         <th>Thời gian</th>
+            //         <th>Lãi</th>
+            //         <th>Dư nợ</th>
+            //         <th>Gốc</th>
+            //         <th>Lãi</th>
+            //         <th>Tổng phải trả</th>
+
+            let totalAmount = 0;
+            let totalLai = 0;
+            let total = 0;
+            for (let i = 0; i < periodValue; i++) {
+
+                let rate = rateAfter;
+                if (i < monthsRatePrefer) rate = ratePrefer;
+
+                let lai = amountValue * rate / 100 / 12;
+
+                amountValue -= amountPerMonths;
+                totalLai += lai;
+                totalAmount += amountPerMonths;
+                let htmlTr = `
+                    <tr>
+                        <td>${i + 1}</td>
+                        <td>${moment(now).add(i + 1, 'months').format('DD/MM/YYYY')}</td>
+                        <td>${rate}%</td>
+                        <td>${formatter.format(amountValue != 0 ? amountValue.toFixed(0) : 0)}</td>
+                        <td>${formatter.format(amountPerMonths.toFixed(0))}</td>
+                        <td>${formatter.format(lai.toFixed(0))}</td>
+                        <td>${formatter.format((amountPerMonths + lai).toFixed(0))}</td>
+                    </tr>
+                `;
+                $('#result').html($('#result').html() + htmlTr);
+            }
+
+            $('#sumary').html(`
+                <tr class="table-success">
+                    <td colspan="4" class="text-center display- font-weight-bold">Tổng</td>
+                    <td>${formatter.format(totalAmount.toFixed(0))}</td>
+                    <td>${formatter.format(totalLai.toFixed(0))}</td>
+                    <td>${formatter.format((totalAmount + totalLai).toFixed(0))}</td>
+                </tr>
+            `);
+
+            $('#result').html(`
+                <tr id="first-sumary" class="table-success">
+                    <td colspan="4" class="text-center display- font-weight-bold">Tổng</td>
+                    <td>${formatter.format(totalAmount.toFixed(0))}</td>
+                    <td>${formatter.format(totalLai.toFixed(0))}</td>
+                    <td>${formatter.format((totalAmount + totalLai).toFixed(0))}</td>
+                </tr>
+            `  + $('#result').html());
+
+            $("#table-result")
+                .get(0)
+                .scrollIntoView({ behavior: "smooth", block: "start", inline: "start" });
+        }
+
+        document.getElementById('form-calc').dispatchEvent(new Event('submit'));
+
+        $(document).on('click', 'tfoot', function () {
+            $("body")
+                .get(0)
+                .scrollIntoView({ behavior: "smooth", block: "start", inline: "start" });
+        });
+        $(document).on('click', '#first-sumary', function () {
+            $("body")
+                .get(0)
+                .scrollIntoView({ behavior: "smooth", block: "end", inline: "start" });
+        });
+    </script>
+</body>
+
+</html>
