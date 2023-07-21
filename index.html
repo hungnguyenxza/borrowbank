@@ -5,11 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bank Money</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 
     <style>
         .table-success {
             cursor: pointer;
+        }
+
+        .lai-co-dinh {
+            display: none;
         }
     </style>
 </head>
@@ -20,28 +25,74 @@
             <div class="form-group">
                 <label for="amount">Tổng tiền vay</label>
                 <div class="input-group">
-                    <input type="text" onkeyup="amountHelp.innerHTML = formatter.format(this.value);" value="800000000" class="form-control" id="amount" aria-describedby="amountHelp" autocomplete="off">
+                    <input type="text" onkeyup="amountHelp.innerHTML = formatCurrency(this.value, true);" value="1000000000"
+                        class="form-control" id="amount" aria-describedby="amountHelp" autocomplete="off">
                     <div class="input-group-append">
                         <span class="input-group-text" id="basic-addon2">đồng</span>
                     </div>
                 </div>
-                <small id="amountHelp" class="form-text text-muted">800.000.000</small>
+                <small id="amountHelp" class="form-text text-muted">1.000.000.000 đ</small>
             </div>
             <div class="form-group">
                 <label for="period">Tổng thời gian vay (năm)</label>
-                <input type="number" value="15" required class="form-control" id="period">
+                <div class="input-group">
+                    <input type="number" value="15" required class="form-control" id="period">
+                    <div class="input-group-append">
+                        <span class="input-group-text" id="basic-addon2">năm</span>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
-                <label for="rate-prefer">Lãi suất ưu đãi (%)</label>
-                <input type="text" value="8.6" class="form-control" id="rate-prefer">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" onchange="kieuLaiOnChange(this)" checked type="radio" name="kieulai"
+                        id="lai-uu-dai" value="lai-uu-dai">
+                    <label class="form-check-label" for="lai-uu-dai">Lãi ưu đãi</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" onchange="kieuLaiOnChange(this)" type="radio" name="kieulai"
+                        id="lai-co-dinh" value="lai-co-dinh">
+                    <label class="form-check-label" for="lai-co-dinh">Lãi cố định</label>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="year-rate-prefer">Số năm ưu đãi</label>
-                <input type="number" value="2" class="form-control" id="year-rate-prefer">
+            <div class="lai-uu-dai">
+                <div class="form-group">
+                    <label for="rate-prefer">Lãi suất ưu đãi (%)</label>
+                    <div class="input-group">
+                        <input type="text" value="8" class="form-control" id="rate-prefer">
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="basic-addon2">%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="year-rate-prefer">Số tháng ưu đãi</label>
+                    <div class="input-group">
+                        <input type="number" value="12" class="form-control" id="month-rate-prefer">
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="basic-addon2">tháng</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="rate-after">Lãi suất thả nổi (%)</label>
+                    <div class="input-group">
+                        <input type="text" value="11" class="form-control" id="rate-after">
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="basic-addon2">%</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="rate-after">Lãi suất thả nổi (%)</label>
-                <input type="text" value="11" class="form-control" id="rate-after">
+            <div class="lai-co-dinh">
+                <div class="form-group">
+                    <label for="rate-prefer">Lãi suất cố định (%)</label>
+                    <div class="input-group">
+                        <input type="text" value="8" class="form-control" id="rate-un-change">
+                        <div class="input-group-append">
+                            <span class="input-group-text" id="basic-addon2">%</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary">Tính</button>
             <button type="reset" class="btn">Xóa</button>
@@ -64,9 +115,15 @@
         </table>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
 
     <script src="https://momentjs.com/downloads/moment.js"></script>
 
@@ -75,35 +132,41 @@
             style: 'currency',
             currency: 'VND',
             minimumFractionDigits: 0
-        })
+        });
 
-        let now = (new Date());
-        now.setDate(1);
-        console.log(now);
+        function formatCurrency(value, isKeepCurrencySymbol) {
+            let display = isKeepCurrencySymbol ? 'đ' : '';
+            return formatter.format(value).replace("VND", display);
+        }
 
         function submitForm(e) {
             e.preventDefault();
 
+            let now = (new Date());
+            now.setDate(1);
+
+            let isLaiUuDai = $('#lai-uu-dai').is(":checked");
+
             let amountValue = parseInt(amount.value);
             let periodValue = parseInt(period.value) * 12;
-            let ratePrefer = parseFloat(document.getElementById('rate-prefer').value);
-            let monthsRatePrefer = parseInt(document.getElementById('year-rate-prefer').value) * 12;
-            let rateAfter = parseFloat(document.getElementById('rate-after').value);
-
             let amountPerMonths = parseFloat(amountValue / periodValue);
 
-            $('#result').html(`
-                <tr>
-                    <td>0</td>
-                    <td>${moment(now).format('DD/MM/YYYY')}</td>
-                    <td>${ratePrefer}%</td>
-                    <td>${formatter.format(amountValue)}</td>
-                    <td>0</td>
-                    <td>0</td>
-                    <td>0</td>
-                </tr>
-            `);
-            // <th>#</th>
+            let interestMonthlyResult;
+            if (isLaiUuDai) {
+                let rate = parseFloat(document.getElementById('rate-after').value);
+                let monthsRatePrefer = parseInt(document.getElementById('month-rate-prefer').value);
+                let ratePrefer = parseFloat(document.getElementById('rate-prefer').value);
+                interestMonthlyResult = calculateInterest(amountValue, periodValue, rate, monthsRatePrefer, ratePrefer)
+            } else {
+                let rate = parseFloat(document.getElementById('rate-un-change').value);
+                interestMonthlyResult = calculateInterest(amountValue, periodValue, rate);
+            }
+
+            $('#result').html('');
+            $('#sumary').html('');
+
+            // Template
+            //         <th>#</th>
             //         <th>Thời gian</th>
             //         <th>Lãi</th>
             //         <th>Dư nợ</th>
@@ -113,26 +176,21 @@
 
             let totalAmount = 0;
             let totalLai = 0;
-            let total = 0;
-            for (let i = 0; i < periodValue; i++) {
+            for (let i = 0; i < interestMonthlyResult.length; i++) {
+                let interestThisMonth = interestMonthlyResult[i];
 
-                let rate = rateAfter;
-                if (i < monthsRatePrefer) rate = ratePrefer;
+                totalLai += interestThisMonth.interest;
+                totalAmount += interestThisMonth.amountPerMonth;
 
-                let lai = amountValue * rate / 100 / 12;
-
-                amountValue -= amountPerMonths;
-                totalLai += lai;
-                totalAmount += amountPerMonths;
                 let htmlTr = `
                     <tr>
-                        <td>${i + 1}</td>
-                        <td>${moment(now).add(i + 1, 'months').format('DD/MM/YYYY')}</td>
-                        <td>${rate}%</td>
-                        <td>${formatter.format(amountValue != 0 ? amountValue.toFixed(0) : 0)}</td>
-                        <td>${formatter.format(amountPerMonths.toFixed(0))}</td>
-                        <td>${formatter.format(lai.toFixed(0))}</td>
-                        <td>${formatter.format((amountPerMonths + lai).toFixed(0))}</td>
+                        <td>${i}</td>
+                        <td>${moment(now).add(i, 'months').format('DD/MM/YYYY')}</td>
+                        <td>${interestThisMonth.rate}%</td>
+                        <td>${formatCurrency(interestThisMonth.remainAmount.toFixed(0))}</td>
+                        <td>${formatCurrency(interestThisMonth.amountPerMonth.toFixed(0))}</td>
+                        <td>${formatCurrency(interestThisMonth.interest.toFixed(0))}</td>
+                        <td>${formatCurrency(interestThisMonth.totalPerMonth.toFixed(0))}</td>
                     </tr>
                 `;
                 $('#result').html($('#result').html() + htmlTr);
@@ -141,18 +199,18 @@
             $('#sumary').html(`
                 <tr class="table-success">
                     <td colspan="4" class="text-center display- font-weight-bold">Tổng</td>
-                    <td>${formatter.format(totalAmount.toFixed(0))}</td>
-                    <td>${formatter.format(totalLai.toFixed(0))}</td>
-                    <td>${formatter.format((totalAmount + totalLai).toFixed(0))}</td>
+                    <td>${formatCurrency(totalAmount.toFixed(0))}</td>
+                    <td>${formatCurrency(totalLai.toFixed(0))}</td>
+                    <td>${formatCurrency((totalAmount + totalLai).toFixed(0))}</td>
                 </tr>
             `);
 
             $('#result').html(`
                 <tr id="first-sumary" class="table-success">
                     <td colspan="4" class="text-center display- font-weight-bold">Tổng</td>
-                    <td>${formatter.format(totalAmount.toFixed(0))}</td>
-                    <td>${formatter.format(totalLai.toFixed(0))}</td>
-                    <td>${formatter.format((totalAmount + totalLai).toFixed(0))}</td>
+                    <td>${formatCurrency(totalAmount.toFixed(0))}</td>
+                    <td>${formatCurrency(totalLai.toFixed(0))}</td>
+                    <td>${formatCurrency((totalAmount + totalLai).toFixed(0))}</td>
                 </tr>
             ` + $('#result').html());
 
@@ -167,24 +225,91 @@
 
         document.getElementById('form-calc').dispatchEvent(new Event('submit'));
 
-        $(document).on('click', 'tfoot', function() {
-            $("body")
-                .get(0)
-                .scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                    inline: "start"
-                });
-        });
-        $(document).on('click', '#first-sumary', function() {
-            $("body")
-                .get(0)
-                .scrollIntoView({
-                    behavior: "smooth",
-                    block: "end",
-                    inline: "start"
-                });
-        });
+        function kieuLaiOnChange(rdo) {
+            cacKieuLai_hide();
+            let kieuLai = rdo.value;
+            $(`.${kieuLai}`).show();
+        }
+        function cacKieuLai_hide() {
+            $('.lai-uu-dai,.lai-co-dinh').hide();
+        }
+
+        // Tính toán lịch trả nợ của khoản vay
+        // Input: 1. Tổng số tiền vay (required)
+        // 2. Thời gian vay (tháng) (required)
+        // 3. Lãi suất (%) (required)
+        // 4. Thời gian hưởng ưu đãi lãi suất (tháng) (optional)
+        // 5. Lãi suất ưu đãi (optional)
+        // Output: InterestMonthly[]
+        // Class InterestMonthly {
+        //      float rate; -- Lãi suất
+        //      float remainAmount; -- Tổng nợ còn lại
+        //      float amountPerMonth; -- Trả nợ gốc hàng tháng
+        //      float interest; -- Trả lãi hàng tháng
+        //      float totalPerMonth; -- Tổng tiền trả hàng tháng
+        //}
+        function calculateInterest(totalAmount, totalTimeInMonths, rate, totalTimePreferInMonths, ratePrefer) {
+            let isLaiUuDai = Boolean(ratePrefer) && Boolean(totalTimePreferInMonths);
+
+            let amountValue = totalAmount;
+            let periodValue = totalTimeInMonths;
+            let monthsRatePrefer = totalTimePreferInMonths;
+
+            let amountPerMonths = parseFloat(amountValue / periodValue);
+
+            let totalNo = 0;
+            let totalLai = 0;
+            let total = 0;
+
+            let result = [];
+
+            let startInterestMonthly = InterestMonthly();
+            startInterestMonthly.rate = rate;
+            startInterestMonthly.remainAmount = amountValue;
+            startInterestMonthly.amountPerMonth = 0;
+            startInterestMonthly.interest = 0;
+            startInterestMonthly.totalPerMonth = 0;
+
+            result.push(startInterestMonthly);
+
+            for (let i = 0; i < periodValue; i++) {
+
+                let rateThisMonth = rate;
+                if (isLaiUuDai) {
+                    if (i < monthsRatePrefer) {
+                        rateThisMonth = ratePrefer;
+                    }
+                }
+
+                let lai = amountValue * rateThisMonth / 100 / 12;
+
+                amountValue -= amountPerMonths;
+                totalLai += lai;
+                totalNo += amountPerMonths;
+
+                let interestMonthly = InterestMonthly();
+
+                interestMonthly.rate = rateThisMonth;
+                interestMonthly.remainAmount = amountValue > 0 ? amountValue : 0;
+                interestMonthly.amountPerMonth = amountPerMonths;
+                interestMonthly.interest = lai;
+                interestMonthly.totalPerMonth = amountPerMonths + lai;
+
+                result.push(interestMonthly);
+            }
+
+            return result;
+        }
+
+        function InterestMonthly() {
+            return {
+                rate: 0.0,
+                remainAmount: 0.0,
+                amountPerMonth: 0.0,
+                interest: 0.0,
+                totalPerMonth: 0.0
+            };
+        }
     </script>
 </body>
 
